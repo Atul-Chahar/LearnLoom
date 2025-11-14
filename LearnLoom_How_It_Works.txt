@@ -1,0 +1,53 @@
+How the LearnLoom App Works (Simple Explanation)
+
+Imagine LearnLoom as a smart helper for teachers and school administrators. It looks at how students are doing and gives helpful insights.
+
+Part 1: Setting Up the Smart Helper (Behind the Scenes)
+
+1.  Raw Data: First, there's a big list of student information, like their scores in different subjects (math, reading, writing) and other details. This is like a messy notebook full of notes.
+2.  Cleaning Up: A special program (called `data_cleaning.py`) takes this messy notebook and tidies it up. It fixes mistakes, removes duplicate entries, fills in missing information, and calculates an "overall score" for each student. This cleaned-up list is saved in a neat file called `cleaned_students.csv`.
+3.  Starting the Brains: The "brain" of the app (the backend, written in Python) starts running. It's like turning on a computer that knows how to read the cleaned student data and answer questions about it.
+4.  Starting the Screen: The "screen" part of the app (the frontend, what you see in your web browser) also starts. It's ready to show you information.
+
+Part 2: What You See and Do (Using the App)
+
+When you first open the app:
+
+1.  Asking for the Big Picture: Your web browser automatically asks the app's "brain" for the main overview information.
+2.  Brain Calculates: The "brain" quickly looks at the `cleaned_students.csv` file and figures out things like:
+    *   How many students there are in total.
+    *   What percentage of students are doing well (called "completion rate").
+    *   The average score of all students.
+    *   What percentage of students might be struggling (called "dropout rate").
+    *   It sends all these numbers back to your browser.
+3.  Screen Shows Numbers: Your browser displays these numbers on the "Overview" page.
+4.  Asking for Smart Thoughts (AI Insights): At the same time, your browser sends all the student data it just got to another part of the "brain" that talks to a super-smart AI (like Gemini).
+5.  AI Thinks: The AI looks at all the student data and the numbers. It then writes a short report with insights, like "Students with higher parental education tend to complete courses more often."
+6.  Screen Shows AI Thoughts: Your browser gets this report from the AI and shows it on the "Overview" page.
+
+When you click on "Trends":
+
+1.  Asking for Trends: Your browser asks the "brain" for information about trends.
+2.  Brain Finds Patterns: The "brain" looks at the `cleaned_students.csv` file again. It finds patterns, like how completion rates change based on parents' education levels, or the average scores in different subjects. It sends these patterns back.
+3.  Screen Shows Charts: Your browser draws colorful charts and graphs to show you these trends, making it easy to see patterns.
+
+When you click on "Scores":
+
+1.  Asking for Score Details: Your browser asks the "brain" for more details about scores.
+2.  Brain Breaks Down Scores: The "brain" calculates things like how many students got each score (score distribution) and how students who took a "test prep course" performed compared to those who didn't. It sends this back.
+3.  Screen Shows Score Charts: Your browser displays charts showing how scores are spread out and how test prep affects performance.
+
+When you click on "Dropouts":
+
+1.  Asking for Dropout Info: Your browser asks the "brain" for information about students who might drop out.
+2.  Brain Analyzes Dropouts: The "brain" figures out dropout rates based on things like parents' education levels and gender. It sends this back.
+3.  Screen Shows Dropout Charts: Your browser shows charts that highlight which groups of students might be at higher risk of dropping out.
+
+When you use the "Predict Completion" tool:
+
+1.  You Give Information: You type in some numbers, like how many hours a student studied, their average quiz score, and how many days they were active.
+2.  Asking for a Prediction: Your browser sends these numbers to the "brain."
+3.  Brain Makes a Guess: The "brain" has a special "prediction model" that learned from all the `cleaned_students.csv` data. It uses your numbers to make an educated guess about how likely this student is to complete their course. It sends this guess (a percentage) back.
+4.  Screen Shows Prediction: Your browser displays the percentage, telling you the predicted chance of completion.
+
+In short, the LearnLoom app takes raw student data, cleans it up, and then uses its "brain" (the backend) to calculate important numbers, find trends, and even make predictions. It then shows all this information to you in an easy-to-understand way on your web browser (the frontend), sometimes even getting smart insights from an AI.
