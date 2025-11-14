@@ -4,7 +4,7 @@ import os
 
 metrics_bp = Blueprint("metrics", __name__)
 
-# Path to cleaned dataset
+# Cleaned data path
 CLEANED_DATA_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "..",
@@ -13,52 +13,93 @@ CLEANED_DATA_PATH = os.path.join(
     "cleaned_students.csv"
 )
 
-# -------------------------------
-# REAL AVERAGE SCORE ENDPOINT
-# -------------------------------
+def load_data():
+    """Helper to load cleaned dataset safely."""
+    try:
+        df = pd.read_csv(CLEANED_DATA_PATH)
+        return df
+    except:
+        return None
+
+
+# ------------------------------
+# 1. AVERAGE SCORE  (DONE)
+# ------------------------------
 @metrics_bp.get("/average-score")
 def average_score():
-    try:
-        # Load cleaned CSV
-        df = pd.read_csv(CLEANED_DATA_PATH)
+    df = load_data()
+    if df is None:
+        return jsonify({"average_score": None})
 
-        # Find columns that contain "score"
-        score_cols = [col for col in df.columns if "score" in col]
+    score_cols = [c for c in df.columns if "score" in c]
 
-        if not score_cols:
-            return jsonify({"average_score": None})
+    if not score_cols:
+        return jsonify({"average_score": None})
 
-        # Mean of all score columns across all students
-        avg = df[score_cols].mean(axis=1).mean()
-
-        return jsonify({"average_score": round(float(avg), 2)})
-
-    except Exception as e:
-        return jsonify({"error": str(e), "average_score": None})
+    avg = df[score_cols].mean(axis=1).mean()
+    return jsonify({"average_score": round(float(avg), 2)})
 
 
-# -------------------------------
-# PLACEHOLDER ENDPOINTS (to fill later)
-# -------------------------------
+# ------------------------------
+# 2. COMPLETION RATE
+# ------------------------------
 @metrics_bp.get("/completion-rate")
 def completion_rate():
-    return jsonify({"completion_rate": 0})
+    df = load_data()
+    if df is None:
+        return jsonify({"completion_rate": None})
+
+    score_cols = [c for c in df.columns if "score" in c]
+    df["avg_score"] = df[score_cols].mean(axis=1)
+
+    completed = df[df["avg_score"] >= 60]
+    rate = (len(completed) / len(df)) * 100
+
+    return jsonify({"completion_rate": round(rate, 2)})
 
 
+# ------------------------------
+# 3. DROPOUT RATE
+# ------------------------------
 @metrics_bp.get("/dropout-rate")
 def dropout_rate():
-    return jsonify({"dropout_rate": 0})
+    df = load_data()
+    if df is None:
+        return jsonify({"dropout_rate": None})
+
+    score_cols = [c for c in df.columns if "score" in c]
+    df["avg_score"] = df[score_cols].mean(axis=1)
+
+    dropout = df[df["avg_score"] <= 40]
+    rate = (len(dropout) / len(df)) * 100
+
+    return jsonify({"dropout_rate": round(rate, 2)})
 
 
+# ------------------------------
+# 4. TOTAL STUDENTS (DONE)
+# ------------------------------
 @metrics_bp.get("/total-students")
 def total_students():
-    try:
-        df = pd.read_csv(CLEANED_DATA_PATH)
-        return jsonify({"total_students": len(df)})
-    except:
+    df = load_data()
+    if df is None:
         return jsonify({"total_students": None})
 
+    return jsonify({"total_students": len(df)})
 
+
+# ------------------------------
+# 5. ACTIVE STUDENTS
+# ------------------------------
 @metrics_bp.get("/active-students")
 def active_students():
-    return jsonify({"active_students": 0})
+    df = load_data()
+    if df is None:
+        return jsonify({"active_students": None})
+
+    score_cols = [c for c in df.columns if "score" in c]
+    df["avg_score"] = df[score_cols].mean(axis=1)
+
+    active = df[(df["avg_score"] > 40) & (df["avg_score"] < 60)]
+
+    return jsonify({"active_students": len(active)})
