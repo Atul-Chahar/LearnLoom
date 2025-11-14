@@ -103,3 +103,42 @@ def active_students():
     active = df[(df["avg_score"] > 40) & (df["avg_score"] < 60)]
 
     return jsonify({"active_students": len(active)})
+
+
+# ------------------------------
+# 6. SCORE TREND (4 WEEKS)
+# ------------------------------
+@metrics_bp.get("/score-trend")
+def score_trend():
+    df = load_data()
+    if df is None:
+        return jsonify({"trend": []})
+    
+    # Find score columns & compute avg_score
+    score_cols = [c for c in df.columns if "score" in c]
+    df["avg_score"] = df[score_cols].mean(axis=1)
+
+    # Number of weeks (4 chunks)
+    num_weeks = 4
+
+    # Split dataset into equal chunks
+    chunk_size = len(df) // num_weeks
+    trend = []
+
+    for week in range(num_weeks):
+        start = week * chunk_size
+        end = start + chunk_size
+
+        # Last chunk must include remaining rows
+        if week == num_weeks - 1:
+            chunk = df.iloc[start:]
+        else:
+            chunk = df.iloc[start:end]
+
+        avg = chunk["avg_score"].mean()
+        trend.append({
+            "week": week + 1,
+            "avg_score": round(float(avg), 2)
+        })
+
+    return jsonify({"trend": trend})
