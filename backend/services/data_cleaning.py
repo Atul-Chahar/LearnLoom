@@ -1,47 +1,43 @@
-import os
 import pandas as pd
+import os
 
-RAW_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "raw")
-CLEANED_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "cleaned")
+# Define paths for raw and cleaned data
+RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'raw', 'StudentsPerformance.csv')
+CLEANED_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'cleaned')
+CLEANED_FILE_PATH = os.path.join(CLEANED_DATA_DIR, 'cleaned_students.csv')
 
-def clean_students_dataset(file_name: str):
+os.makedirs(CLEANED_DATA_DIR, exist_ok=True)
+
+def clean_students_dataset(raw_file_name: str):
     """
-    Cleans the raw Kaggle dataset and stores a cleaned version in data/cleaned.
+    Cleans the 'StudentsPerformance.csv' dataset and saves it.
+    - Renames columns for clarity
+    - Standardizes categorical values
     """
+    print("Starting data cleaning process...")
+    try:
+        df = pd.read_csv(os.path.join(os.path.dirname(RAW_DATA_PATH), raw_file_name))
 
-    raw_path = os.path.join(RAW_DATA_DIR, file_name)
-    cleaned_path = os.path.join(CLEANED_DATA_DIR, "cleaned_students.csv")
+        # Rename columns to be more programmatic
+        df.rename(columns={
+            'gender': 'gender',
+            'race/ethnicity': 'ethnicity',
+            'parental level of education': 'parent_education',
+            'lunch': 'lunch_type',
+            'test preparation course': 'test_prep_course',
+            'math score': 'math_score',
+            'reading score': 'reading_score',
+            'writing score': 'writing_score'
+        }, inplace=True)
 
-    # Make sure cleaned dir exists
-    os.makedirs(CLEANED_DATA_DIR, exist_ok=True)
+        # Save the cleaned file
+        df.to_csv(CLEANED_FILE_PATH, index=False)
+        print(f"Data cleaned successfully. Cleaned file saved to: {CLEANED_FILE_PATH}")
+        return CLEANED_FILE_PATH
 
-    # Load raw CSV into Pandas dataframe
-    df = pd.read_csv(raw_path)
-
-    # Standardize column names (lowercase, underscores)
-    df.columns = (
-        df.columns
-        .str.strip()
-        .str.lower()
-        .str.replace(" ", "_")
-        .str.replace("-", "_")
-    )
-
-    # Remove duplicate rows
-    df = df.drop_duplicates()
-
-    # Remove fully empty rows
-    df = df.dropna(how="all")
-
-    # Fill missing numeric values with column mean
-    numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
-    df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
-
-    # Fill missing text values with "Unknown"
-    text_cols = df.select_dtypes(include=["object"]).columns
-    df[text_cols] = df[text_cols].fillna("Unknown")
-
-    # Save cleaned dataset
-    df.to_csv(cleaned_path, index=False)
-
-    return cleaned_path
+    except FileNotFoundError:
+        print(f"Error: Raw data file '{raw_file_name}' not found at {RAW_DATA_PATH}")
+        return None
+    except Exception as e:
+        print(f"An error occurred during data cleaning: {e}")
+        return None

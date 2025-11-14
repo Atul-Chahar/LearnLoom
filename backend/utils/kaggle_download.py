@@ -1,29 +1,29 @@
 import os
-from kaggle.api.kaggle_api_extended import KaggleApi
+import kaggle
+from zipfile import ZipFile
 
-RAW_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "raw")
+# Define the path where raw data will be stored
+RAW_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'raw')
+os.makedirs(RAW_DATA_DIR, exist_ok=True)
 
-def download_kaggle_dataset(dataset_name: str, file_name: str = None):
+def download_kaggle_dataset(dataset_id: str):
     """
-    Downloads a Kaggle dataset into data/raw folder.
-    Example dataset: "mlg-ulb/creditcardfraud"
+    Downloads a dataset from Kaggle and extracts it.
+
+    Args:
+        dataset_id (str): The dataset identifier from Kaggle (e.g., 'user/dataset-name').
+
+    Returns:
+        str: The path to the directory where files were extracted.
     """
-
-    # Make sure raw data directory exists
-    os.makedirs(RAW_DATA_DIR, exist_ok=True)
-
-    api = KaggleApi()
-    api.authenticate()
-
-    print(f"Downloading dataset: {dataset_name}")
-
-    # Download dataset as zip file
-    api.dataset_download_files(dataset_name, path=RAW_DATA_DIR, unzip=True)
-
-    print("Download completed.")
-
-    # If dataset contains a specific file we need
-    if file_name:
-        return os.path.join(RAW_DATA_DIR, file_name)
-
-    return RAW_DATA_DIR
+    print(f"Downloading dataset: {dataset_id}...")
+    try:
+        # Authenticate and download the dataset
+        kaggle.api.authenticate()
+        kaggle.api.dataset_download_files(dataset_id, path=RAW_DATA_DIR, unzip=True)
+        print(f"Dataset downloaded and extracted to {RAW_DATA_DIR}")
+        return RAW_DATA_DIR
+    except Exception as e:
+        print(f"Error downloading dataset from Kaggle: {e}")
+        print("Please ensure your kaggle.json API token is set up correctly.")
+        return None
