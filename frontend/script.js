@@ -435,12 +435,40 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchDataAndRender();
 });
 
-// --- Theme Toggle (Placeholder) ---
+// --- Theme Toggle ---
 const themeToggle = document.getElementById('themeToggle');
-if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme'); // Example class toggle
-        // You would implement actual theme switching logic here
-        console.log('Theme toggle clicked!');
-    });
+const htmlElement = document.documentElement; // Target the <html> element
+
+// Function to set the theme
+function setTheme(theme) {
+    htmlElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (themeToggle) {
+        themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    }
 }
+
+// Function to toggle the theme
+function toggleTheme() {
+    const currentTheme = htmlElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+}
+
+// Apply saved theme on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // If no saved theme, check system preference
+        setTheme('dark');
+    } else {
+        setTheme('light'); // Default to light theme
+    }
+
+    // Event listener for the toggle button
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+});
