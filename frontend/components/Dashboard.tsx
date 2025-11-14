@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { StudentData } from '../types';
 import { getLearningInsights } from '../services/geminiService';
 
-import StatCard from '../components/StatCard';
-import CompletionRateChart from '../charts/CompletionRateChart';
-import ScoreDistributionChart from '../components/ScoreDistributionChart';
-import EngagementCorrelationChart from '../components/EngagementCorrelationChart';
-import AiInsights from '../components/AiInsights';
-import DataUploader from '../components/DataUploader';
+import StatCard from './StatCard';
+import CompletionRateChart from './CompletionRateChart';
+import ScoreDistributionChart from './ScoreDistributionChart';
+import EngagementCorrelationChart from './EngagementCorrelationChart';
+import AiInsights from './AiInsights';
+import DataUploader from './DataUploader';
 
 const Dashboard: React.FC = () => {
   const [studentData, setStudentData] = useState<StudentData[] | null>(null);
