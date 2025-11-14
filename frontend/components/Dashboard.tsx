@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { StudentData } from '../types';
+import React, { useState, useEffect } from 'react';
+import { StudentData, DashboardStats } from '../types';
+import { getDashboardData } from '../src/api'; // Corrected import path
 import { getLearningInsights } from '../services/geminiService';
 
 import StatCard from './StatCard';
@@ -7,14 +8,43 @@ import CompletionRateChart from './CompletionRateChart';
 import ScoreDistributionChart from './ScoreDistributionChart';
 import EngagementCorrelationChart from './EngagementCorrelationChart';
 import AiInsights from './AiInsights';
-import DataUploader from './DataUploader';
 
 const Dashboard: React.FC = () => {
-  const [studentData, setStudentData] = useState<StudentData[] | null>(null);
+  const [studentData, setStudentData] = useState<StudentData[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [insights, setInsights] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  // Combined loading state for all async operations
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // State for AI insights loading, separate from initial data load
+  const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
 
+  // Fetch initial dashboard data from the backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getDashboardData();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        setStats(data.stats);
+        setStudentData(data.studentData);
+      } catch (err) {
+        setError('Failed to fetch dashboard data from the backend. Please ensure the backend server is running.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Fetch AI insights when student data is available
   useEffect(() => {
     if (!studentData || studentData.length === 0) {
       return;
@@ -22,77 +52,42 @@ const Dashboard: React.FC = () => {
 
     const fetchInsights = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
+        setIsAiLoading(true);
         const generatedInsights = await getLearningInsights(studentData);
         setInsights(generatedInsights);
       } catch (err) {
-        setError('Failed to fetch AI-powered insights. Please try again later.');
+        setError('Failed to fetch AI-powered insights.');
         console.error(err);
       } finally {
-        setIsLoading(false);
+        setIsAiLoading(false);
       }
     };
 
     fetchInsights();
   }, [studentData]);
 
-  const handleReset = useCallback(() => {
-    setStudentData(null);
-    setInsights('');
-    setError(null);
-  }, []);
+  if (isLoading) {
+    return <div className="text-center p-8">Loading dashboard data...</div>;
+  }
 
-  const dashboardStats = useMemo(() => {
-    if (!studentData) return null;
+  if (error) {
+    return <div className="text-center p-8 text-red-500">{error}</div>;
+  }
 
-    const totalStudents = studentData.length;
-    const completedCount = studentData.filter(s => s.completed).length;
-    const completionRate = totalStudents > 0 ? (completedCount / totalStudents) * 100 : 0;
-    const totalHours = studentData.reduce((acc, s) => acc + s.hoursWatched, 0);
-    const avgHours = totalStudents > 0 ? totalHours / totalStudents : 0;
-    const avgScore = studentData.reduce((acc, s) => {
-        const studentAvg = s.quizScores.reduce((a, b) => a + b, 0) / (s.quizScores.length || 1);
-        return acc + studentAvg;
-    }, 0) / (totalStudents || 1);
-
-
-    return {
-      totalStudents: totalStudents.toString(),
-      completionRate: `${completionRate.toFixed(1)}%`,
-      avgScore: `${avgScore.toFixed(1)}`,
-      avgHours: `${avgHours.toFixed(1)} hrs`,
-    };
-  }, [studentData]);
-
-  if (!studentData) {
-    return <DataUploader onDataLoaded={setStudentData} />;
+  if (!stats || studentData.length === 0) {
+    return <div className="text-center p-8">No student data available.</div>;
   }
 
   return (
     <div className="space-y-6">
-       <div className="flex justify-between items-center flex-wrap gap-4">
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Dashboard Overview</h2>
-        <button
-          onClick={handleReset}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md flex items-center transition-colors text-sm"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Load New Data
-        </button>
-      </div>
-
+      <h2 className="text-xl font-semibold text-gray-800">Dashboard Overview</h2>
+      
       {/* Stats Grid */}
-      {dashboardStats && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Students" value={dashboardStats.totalStudents} />
-          <StatCard title="Completion Rate" value={dashboardStats.completionRate} />
-          <StatCard title="Average Score" value={dashboardStats.avgScore} />
-          <StatCard title="Avg. Study Hours" value={dashboardStats.avgHours} />
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard title="Total Students" value={stats.totalStudents.toString()} />
+        <StatCard title="Completion Rate" value={`${stats.completionRate}%`} />
+        <StatCard title="Average Score" value={stats.averageScore.toString()} />
+      </div>
 
       {/* Main Grid for Charts and Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -107,7 +102,7 @@ const Dashboard: React.FC = () => {
 
         {/* Right column for AI Insights */}
         <div className="lg:col-span-1">
-          <AiInsights insights={insights} isLoading={isLoading} error={error} />
+          <AiInsights insights={insights} isLoading={isAiLoading} error={null} />
         </div>
       </div>
     </div>
@@ -115,3 +110,4 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+

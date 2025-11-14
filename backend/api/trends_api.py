@@ -1,27 +1,14 @@
 from flask import Blueprint, jsonify
 import pandas as pd
 import os
+from services.data_cleaning import load_cleaned_data # Import the centralized data loader
 
 trends_bp = Blueprint("trends", __name__)
 
-CLEANED_DATA_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "..",
-    "data",
-    "cleaned",
-    "cleaned_students.csv"
-)
-
-def load_data():
-    try:
-        return pd.read_csv(CLEANED_DATA_PATH)
-    except:
-        return None
-
 @trends_bp.get("/score-trend")
 def score_trend():
-    df = load_data()
-    if df is None:
+    df = load_cleaned_data() # Use the centralized data loader
+    if df is None or df.empty:
         return jsonify({"trend": []})
 
     score_cols = [c for c in df.columns if "score" in c]

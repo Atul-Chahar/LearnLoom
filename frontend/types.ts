@@ -1,10 +1,18 @@
 
 export interface StudentData {
-  studentId: string;
-  name: string;
-  course: string;
-  hoursWatched: number;
-  quizScores: number[]; // Array of scores from 0 to 100
-  completed: boolean;
-  dropoutWeek: number | null; // Week number if dropped out, else null
+  gender: string;
+  ethnicity: string;
+  parent_education: string;
+  lunch_type: string;
+  test_prep_course: string;
+  math_score: number;
+  reading_score: number;
+  writing_score: number;
+  overall_score?: number; // Added by backend, but optional for interface
+}
+
+export interface DashboardStats {
+  totalStudents: number;
+  completionRate: number;
+  averageScore: number;
 }

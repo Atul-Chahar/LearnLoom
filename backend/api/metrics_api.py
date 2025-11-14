@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.data_loader import load_student_data
+from services.data_cleaning import load_cleaned_data
 
 metrics_bp = Blueprint("metrics", __name__)
 
@@ -8,8 +8,8 @@ metrics_bp = Blueprint("metrics", __name__)
 # -----------------------------
 @metrics_bp.get("/average-score")
 def average_score():
-    df = load_student_data()
-    if df.empty:
+    df = load_cleaned_data()
+    if df is None or df.empty:
         return jsonify({"average_score": 0})
 
     score_cols = ["math_score", "reading_score", "writing_score"]
@@ -28,8 +28,8 @@ def average_score():
 # -----------------------------
 @metrics_bp.get("/completion-rate")
 def completion_rate():
-    df = load_student_data()
-    if df.empty:
+    df = load_cleaned_data()
+    if df is None or df.empty:
         return jsonify({"completion_rate": 0})
 
     score_cols = ["math_score", "reading_score", "writing_score"]
@@ -52,8 +52,8 @@ def completion_rate():
 # -----------------------------
 @metrics_bp.get("/dropout-rate")
 def dropout_rate():
-    df = load_student_data()
-    if df.empty:
+    df = load_cleaned_data()
+    if df is None or df.empty:
         return jsonify({"dropout_rate": 0})
 
     score_cols = ["math_score", "reading_score", "writing_score"]
@@ -76,8 +76,8 @@ def dropout_rate():
 # -----------------------------
 @metrics_bp.get("/total-students")
 def total_students():
-    df = load_student_data()
-    return jsonify({"total_students": len(df) if not df.empty else 0})
+    df = load_cleaned_data()
+    return jsonify({"total_students": len(df) if df is not None and not df.empty else 0})
 
 
 # -----------------------------
@@ -85,8 +85,8 @@ def total_students():
 # -----------------------------
 @metrics_bp.get("/active-students")
 def active_students():
-    df = load_student_data()
-    if df.empty:
+    df = load_cleaned_data()
+    if df is None or df.empty:
         return jsonify({"active_students": 0})
 
     score_cols = ["math_score", "reading_score", "writing_score"]

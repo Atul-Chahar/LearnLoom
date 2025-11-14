@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.data_loader import load_student_data
+from services.data_cleaning import load_cleaned_data
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -8,8 +8,8 @@ def dashboard_data():
     """
     Provides all necessary data for the main dashboard view in a single call.
     """
-    df = load_student_data()
-    if df.empty:
+    df = load_cleaned_data()
+    if df is None or df.empty:
         return jsonify({"error": "No data available"}), 500
 
     # Calculate basic stats

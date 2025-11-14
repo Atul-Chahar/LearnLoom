@@ -8,21 +8,24 @@ interface ScoreDistributionChartProps {
 
 const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({ data }) => {
   const chartData = useMemo(() => {
-    // Score range is 0-1000 in the new dataset
+    // Score range is 0-100 for individual scores
     const scoreBins = [
-      { name: '0-500', count: 0 },
-      { name: '501-700', count: 0 },
-      { name: '701-850', count: 0 },
-      { name: '851-1000', count: 0 },
+      { name: '0-59 (Fail)', count: 0 },
+      { name: '60-69 (Pass)', count: 0 },
+      { name: '70-79 (Good)', count: 0 },
+      { name: '80-89 (Very Good)', count: 0 },
+      { name: '90-100 (Excellent)', count: 0 },
     ];
 
     data.forEach(student => {
-      // The dataset has a single score, so no need to average
-      const score = student.quizScores[0] || 0;
-      if (score <= 500) scoreBins[0].count++;
-      else if (score <= 700) scoreBins[1].count++;
-      else if (score <= 850) scoreBins[2].count++;
-      else scoreBins[3].count++;
+      // Calculate average score from individual scores
+      const score = (student.math_score + student.reading_score + student.writing_score) / 3;
+      
+      if (score < 60) scoreBins[0].count++;
+      else if (score < 70) scoreBins[1].count++;
+      else if (score < 80) scoreBins[2].count++;
+      else if (score < 90) scoreBins[3].count++;
+      else scoreBins[4].count++;
     });
 
     return scoreBins;

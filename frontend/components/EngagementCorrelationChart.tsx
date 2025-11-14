@@ -10,7 +10,7 @@ const EngagementCorrelationChart: React.FC<EngagementCorrelationChartProps> = ({
   const chartData = useMemo(() => {
     return data.map(student => ({
       hours: student.hoursWatched,
-      score: student.quizScores[0] || 0, // Single score from the dataset
+      score: (student.math_score + student.reading_score + student.writing_score) / 3, // Calculate average score
       completed: student.completed ? 'Completed' : 'Did Not Complete'
     }));
   }, [data]);

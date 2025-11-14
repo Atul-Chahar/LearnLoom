@@ -13,7 +13,7 @@ def clean_students_dataset(raw_file_name: str):
     Cleans the raw Kaggle dataset and stores a cleaned version in data/cleaned.
     """
 
-    raw_path = os.path.join(RAW_DATA_DIR, file_name)
+    raw_path = os.path.join(RAW_DATA_DIR, raw_file_name)
     cleaned_path = os.path.join(CLEANED_DATA_DIR, "cleaned_students.csv")
 
     # Make sure cleaned dir exists
@@ -48,7 +48,7 @@ def clean_students_dataset(raw_file_name: str):
     # Save cleaned dataset
     df.to_csv(cleaned_path, index=False)
 
-    return cleaned_path
+    return df, cleaned_path
 
 
 def load_cleaned_data():
