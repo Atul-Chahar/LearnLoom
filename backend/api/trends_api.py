@@ -1,45 +1,34 @@
 from flask import Blueprint, jsonify
+from services.data_cleaning import load_cleaned_data
 import pandas as pd
-import os
-from services.data_cleaning import load_cleaned_data # Import the centralized data loader
 
 trends_bp = Blueprint("trends", __name__)
 
-@trends_bp.get("/score-trend")
-def score_trend():
-    df = load_cleaned_data() # Use the centralized data loader
+@trends_bp.get("/trends-data")
+def trends_data():
+    df = load_cleaned_data()
     if df is None or df.empty:
-        return jsonify({"trend": []})
+        return jsonify({"error": "No data available"}), 500
 
-    score_cols = [c for c in df.columns if "score" in c]
-    if not score_cols:
-        return jsonify({"trend": []})
+    score_cols = ['math_score', 'reading_score', 'writing_score']
+    existing_score_cols = [col for col in score_cols if col in df.columns]
+    
+    if not existing_score_cols:
+        return jsonify({"error": "No score data available"}), 500
 
-    df["avg_score"] = df[score_cols].mean(axis=1)
+    df['overall_score'] = df[existing_score_cols].mean(axis=1)
 
-    num_weeks = 4
-    chunk_size = len(df) // num_weeks if len(df) else 0
-    trend = []
+    # Learning Completion Trend (using parental level of education as a proxy for trend)
+    completion_by_education = df.groupby('parental level of education')['overall_score'].apply(
+        lambda x: (x >= 60).sum() / len(x) * 100 if len(x) > 0 else 0
+    ).reset_index()
+    completion_by_education = completion_by_education.rename(columns={'overall_score': 'completion_rate'})
+    
+    # Average Scores (per subject)
+    average_scores_by_subject = df[existing_score_cols].mean().reset_index()
+    average_scores_by_subject = average_scores_by_subject.rename(columns={'index': 'subject', 0: 'average_score'})
 
-    for week in range(num_weeks):
-        start = week * chunk_size
-        end = start + chunk_size
-        if week == num_weeks - 1:
-            chunk = df.iloc[start:]
-        else:
-            chunk = df.iloc[start:end]
-        avg = chunk["avg_score"].mean() if not chunk.empty else 0
-        trend.append({
-            "week": week + 1,
-            "avg_score": round(float(avg), 2)
-        })
-
-    return jsonify({"trend": trend})
-
-@trends_bp.get("/activity-trend")
-def activity_trend():
-    return jsonify({"dates": [], "activity": []})
-
-@trends_bp.get("/weekly-progress")
-def weekly_progress():
-    return jsonify({"weeks": [], "average_scores": []})
+    return jsonify({
+        "completionTrend": completion_by_education.to_dict(orient='records'),
+        "averageScoresBySubject": average_scores_by_subject.to_dict(orient='records')
+    })

@@ -14,25 +14,6 @@ def dashboard_data():
     if df is None or df.empty:
         return jsonify({"error": "No data available"}), 500
 
-    # Get date filters from query parameters
-    start_date_str = request.args.get('start_date')
-    end_date_str = request.args.get('end_date')
-
-    # Apply date filtering if parameters are provided
-    if 'submission_date' in df.columns:
-        df['submission_date'] = pd.to_datetime(df['submission_date'])
-        if start_date_str:
-            start_date = pd.to_datetime(start_date_str)
-            df = df[df['submission_date'] >= start_date]
-        if end_date_str:
-            end_date = pd.to_datetime(end_date_str)
-            df = df[df['submission_date'] <= end_date]
-    else:
-        # If submission_date column is missing, log a warning or handle as appropriate
-        print("Warning: 'submission_date' column not found in data. Date filtering will not be applied.")
-
-
-    # Recalculate stats after filtering
     total_students = len(df)
     
     score_cols = ['math_score', 'reading_score', 'writing_score']
@@ -40,7 +21,7 @@ def dashboard_data():
     
     if not existing_score_cols:
         # If no score data after filtering, return appropriate error or empty stats
-        return jsonify({"stats": {"totalStudents": 0, "completionRate": 0, "averageScore": 0}, "studentData": []})
+        return jsonify({"stats": {"totalStudents": 0, "completionRate": 0, "averageScore": 0, "dropoutRate": 0, "activeStudents": 0}, "studentData": []})
 
     df['overall_score'] = df[existing_score_cols].mean(axis=1)
     
@@ -50,6 +31,13 @@ def dashboard_data():
 
     # Average score
     average_score = df['overall_score'].mean() if not df.empty else 0
+
+    # Dropout rate (overall_score < 40)
+    dropout_students = df[df['overall_score'] < 40]
+    dropout_rate = (len(dropout_students) / total_students) * 100 if total_students > 0 else 0
+
+    # Active students (using total students as a proxy for now)
+    active_students = total_students
     
     # Convert dataframe to list of dictionaries for JSON serialization
     student_data_list = df.to_dict(orient='records')
@@ -59,6 +47,8 @@ def dashboard_data():
             "totalStudents": total_students,
             "completionRate": round(completion_rate, 1),
             "averageScore": round(average_score, 1),
+            "dropoutRate": round(dropout_rate, 1),
+            "activeStudents": active_students,
         },
         "studentData": student_data_list
     })

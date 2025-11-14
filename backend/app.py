@@ -9,7 +9,9 @@ from api.predict_api import predict_bp
 from api.refresh_api import refresh_bp
 from api.system_api import system_bp
 from api.ai_api import ai_bp
-from api.dashboard_api import dashboard_bp # New import
+from api.dashboard_api import dashboard_bp # Moved import
+from api.scores_api import scores_bp
+from api.dropouts_api import dropouts_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -27,7 +29,9 @@ app.register_blueprint(predict_bp, url_prefix="/api")
 app.register_blueprint(refresh_bp, url_prefix="/api")
 app.register_blueprint(system_bp, url_prefix="/api")
 app.register_blueprint(ai_bp, url_prefix="/api")
-app.register_blueprint(dashboard_bp, url_prefix="/api") # New registration
+app.register_blueprint(dashboard_bp, url_prefix="/api")
+app.register_blueprint(scores_bp, url_prefix="/api")
+app.register_blueprint(dropouts_bp, url_prefix="/api")
 
 if __name__ == "__main__":
     app.run(debug=True)

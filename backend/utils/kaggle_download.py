@@ -1,6 +1,5 @@
 import os
 import kaggle
-from zipfile import ZipFile
 
 # Define the path where raw data will be stored
 RAW_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'raw')

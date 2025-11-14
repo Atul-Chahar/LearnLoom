@@ -1,57 +1,61 @@
 const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
 // --- DOM Elements ---
-const startDateInput = document.getElementById('startDate');
-const endDateInput = document.getElementById('endDate');
-const totalStudentsElem = document.getElementById('totalStudents');
 const completionRateElem = document.getElementById('completionRate');
-const averageScoreElem = document.getElementById('averageScore');
-const scoreDistributionChartElem = document.getElementById('scoreDistributionChart');
-const engagementCorrelationChartElem = document.getElementById('engagementCorrelationChart');
+const avgScoreElem = document.getElementById('avgScore');
+const dropoutRateElem = document.getElementById('dropoutRate');
+const activeCountElem = document.getElementById('activeCount');
+
+const chartCompletionElem = document.getElementById('chart-completion');
+const chartScoresElem = document.getElementById('chart-scores');
+const chartDropoutElem = document.getElementById('chart-dropout');
+const chartScoreDistributionElem = document.getElementById('chart-score-distribution');
+const chartTestPrepElem = document.getElementById('chart-test-prep');
+
 const aiInsightsElem = document.getElementById('aiInsights');
-const loadingIndicator = document.getElementById('loading');
-const errorDisplay = document.getElementById('error');
+const loadingIndicator = document.getElementById('loading'); // Assuming a loading indicator
+const errorDisplay = document.getElementById('error'); // Assuming an error display
+
+// Predictor elements
+const inputHours = document.getElementById('input-hours');
+const inputQuiz = document.getElementById('input-quiz');
+const inputDays = document.getElementById('input-days');
+const predictBtn = document.getElementById('predictBtn');
+const predictResult = document.getElementById('predictResult');
+
+let currentStudentData = []; // To store student data fetched for AI insights
 
 // --- Helper Functions ---
 function showLoading() {
-    loadingIndicator.style.display = 'block';
-    errorDisplay.style.display = 'none';
+    // if (loadingIndicator) loadingIndicator.style.display = 'block';
+    if (errorDisplay) errorDisplay.style.display = 'none';
 }
 
 function hideLoading() {
-    loadingIndicator.style.display = 'none';
+    // if (loadingIndicator) loadingIndicator.style.display = 'none';
 }
 
 function showError(message) {
-    errorDisplay.textContent = `Error: ${message}`;
-    errorDisplay.style.display = 'block';
+    if (errorDisplay) {
+        errorDisplay.textContent = `Error: ${message}`;
+        errorDisplay.style.display = 'block';
+    }
+    console.error(message);
 }
 
 function clearError() {
-    errorDisplay.style.display = 'none';
-    errorDisplay.textContent = '';
+    if (errorDisplay) {
+        errorDisplay.style.display = 'none';
+        errorDisplay.textContent = '';
+    }
 }
 
 // --- API Calls ---
-async function getDashboardData(startDate, endDate) {
+async function getDashboardData() {
     clearError();
     showLoading();
     try {
-        let url = `${API_BASE_URL}/dashboard-data`;
-        const params = new URLSearchParams();
-
-        if (startDate) {
-            params.append('start_date', startDate);
-        }
-        if (endDate) {
-            params.append('end_date', endDate);
-        }
-
-        if (params.toString()) {
-            url += `?${params.toString()}`;
-        }
-
-        const response = await fetch(url);
+        const response = await fetch(`${API_BASE_URL}/dashboard-data`);
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `Backend responded with status ${response.status}`);
@@ -60,6 +64,63 @@ async function getDashboardData(startDate, endDate) {
         return data;
     } catch (error) {
         showError(`Failed to fetch dashboard data: ${error.message}`);
+        throw error;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function getTrendsData() {
+    clearError();
+    showLoading();
+    try {
+        const response = await fetch(`${API_BASE_URL}/trends-data`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Backend responded with status ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        showError(`Failed to fetch trends data: ${error.message}`);
+        throw error;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function getScoresData() {
+    clearError();
+    showLoading();
+    try {
+        const response = await fetch(`${API_BASE_URL}/scores-data`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Backend responded with status ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        showError(`Failed to fetch scores data: ${error.message}`);
+        throw error;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function getDropoutsData() {
+    clearError();
+    showLoading();
+    try {
+        const response = await fetch(`${API_BASE_URL}/dropouts-data`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Backend responded with status ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        showError(`Failed to fetch dropouts data: ${error.message}`);
         throw error;
     } finally {
         hideLoading();
@@ -89,115 +150,236 @@ async function getLearningInsights(studentData) {
     }
 }
 
+async function predictCompletion(hoursWatched, averageScore, daysActive) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/predict`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                hours_watched: hoursWatched,
+                average_score: averageScore,
+                activity_level: daysActive
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Backend responded with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.completion_likelihood;
+    } catch (error) {
+        showError(`Failed to get prediction: ${error.message}`);
+        return null;
+    }
+}
+
 // --- Rendering Functions ---
 function renderStats(stats) {
-    totalStudentsElem.textContent = stats.totalStudents;
-    completionRateElem.textContent = `${stats.completionRate}%`;
-    averageScoreElem.textContent = stats.averageScore;
-}
-
-function renderScoreDistributionChart(studentData) {
-    scoreDistributionChartElem.innerHTML = ''; // Clear previous chart
-
-    if (!studentData || studentData.length === 0) {
-        scoreDistributionChartElem.textContent = 'No data for score distribution.';
-        return;
-    }
-
-    const scoreBins = [
-        { name: '0-59 (Fail)', count: 0 },
-        { name: '60-69 (Pass)', count: 0 },
-        { name: '70-79 (Good)', count: 0 },
-        { name: '80-89 (Very Good)', count: 0 },
-        { name: '90-100 (Excellent)', count: 0 },
-    ];
-
-    studentData.forEach(student => {
-        const score = (student.math_score + student.reading_score + student.writing_score) / 3;
-        if (score < 60) scoreBins[0].count++;
-        else if (score < 70) scoreBins[1].count++;
-        else if (score < 80) scoreBins[2].count++;
-        else if (score < 90) scoreBins[3].count++;
-        else scoreBins[4].count++;
-    });
-
-    const ul = document.createElement('ul');
-    scoreBins.forEach(bin => {
-        const li = document.createElement('li');
-        const percentage = studentData.length > 0 ? (bin.count / studentData.length) * 100 : 0;
-        li.innerHTML = `
-            <span>${bin.name}</span>
-            <span>${bin.count} (${percentage.toFixed(1)}%)</span>
-            <div class="bar-container"><div class="bar" style="width: ${percentage}%;"></div></div>
-        `;
-        ul.appendChild(li);
-    });
-    scoreDistributionChartElem.appendChild(ul);
-}
-
-function renderEngagementCorrelationChart(studentData) {
-    engagementCorrelationChartElem.innerHTML = ''; // Clear previous chart
-
-    if (!studentData || studentData.length === 0) {
-        engagementCorrelationChartElem.textContent = 'No data for performance by test preparation.';
-        return;
-    }
-
-    const groupedData = {};
-    studentData.forEach(student => {
-        const testPrep = student.test_prep_course === 'none' ? 'No Prep' : 'Completed Prep';
-        const averageScore = (student.math_score + student.reading_score + student.writing_score) / 3;
-
-        if (!groupedData[testPrep]) {
-            groupedData[testPrep] = { totalScore: 0, count: 0 };
-        }
-        groupedData[testPrep].totalScore += averageScore;
-        groupedData[testPrep].count++;
-    });
-
-    const chartData = Object.keys(groupedData).map(key => ({
-        name: key,
-        averageScore: groupedData[key].totalScore / groupedData[key].count,
-    }));
-
-    const ul = document.createElement('ul');
-    chartData.forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span>${item.name}</span>
-            <span>${item.averageScore.toFixed(1)}</span>
-            <div class="bar-container"><div class="bar" style="width: ${item.averageScore}%;"></div></div>
-        `;
-        ul.appendChild(li);
-    });
-    engagementCorrelationChartElem.appendChild(ul);
+    if (completionRateElem) completionRateElem.textContent = `${stats.completionRate}%`;
+    if (avgScoreElem) avgScoreElem.textContent = `${stats.averageScore}`;
+    if (dropoutRateElem) dropoutRateElem.textContent = `${stats.dropoutRate}%`;
+    if (activeCountElem) activeCountElem.textContent = `${stats.activeStudents}`;
 }
 
 function renderAiInsights(insights) {
-    aiInsightsElem.innerHTML = insights;
+    if (aiInsightsElem) aiInsightsElem.innerHTML = insights;
 }
+
+function renderTrendsCharts(data) {
+    // Learning Completion Trend (chart-completion)
+    if (chartCompletionElem && data.completionTrend) {
+        const trace = {
+            x: data.completionTrend.map(item => item.parental_level_of_education),
+            y: data.completionTrend.map(item => item.completion_rate),
+            type: 'bar',
+            marker: { color: '#4F46E5' },
+            name: 'Completion Rate'
+        };
+        const layout = {
+            title: 'Completion Rate by Parental Education Level',
+            xaxis: { title: 'Parental Education Level' },
+            yaxis: { title: 'Completion Rate (%)' }
+        };
+        Plotly.newPlot(chartCompletionElem, [trace], layout);
+    }
+
+    // Average Scores (chart-scores)
+    if (chartScoresElem && data.averageScoresBySubject) {
+        const trace = {
+            x: data.averageScoresBySubject.map(item => item.subject),
+            y: data.averageScoresBySubject.map(item => item.average_score),
+            type: 'bar',
+            marker: { color: '#10B981' },
+            name: 'Average Score'
+        };
+        const layout = {
+            title: 'Average Scores by Subject',
+            xaxis: { title: 'Subject' },
+            yaxis: { title: 'Average Score' }
+        };
+        Plotly.newPlot(chartScoresElem, [trace], layout);
+    }
+}
+
+function renderScoresCharts(data) {
+    // Score Distribution (chart-score-distribution)
+    if (chartScoreDistributionElem && data.scoreDistribution) {
+        const trace = {
+            x: data.scoreDistribution.map(item => item.score),
+            y: data.scoreDistribution.map(item => item.count),
+            type: 'bar', // Use bar chart for pre-aggregated counts
+            marker: {
+                color: '#4F46E5'
+            },
+            name: 'Score Distribution'
+        };
+        const layout = {
+            title: 'Overall Score Distribution',
+            xaxis: { title: 'Score' },
+            yaxis: { title: 'Number of Students' }
+        };
+        Plotly.newPlot(chartScoreDistributionElem, [trace], layout);
+    }
+
+    // Performance by Test Preparation (chart-test-prep)
+    if (chartTestPrepElem && data.performanceByTestPrep) {
+        const trace = {
+            x: data.performanceByTestPrep.map(item => item.test_preparation_course),
+            y: data.performanceByTestPrep.map(item => item.average_score),
+            type: 'bar',
+            marker: { color: '#F59E0B' },
+            name: 'Average Score'
+        };
+        const layout = {
+            title: 'Performance by Test Preparation Course',
+            xaxis: { title: 'Test Preparation Course' },
+            yaxis: { title: 'Average Score' }
+        };
+        Plotly.newPlot(chartTestPrepElem, [trace], layout);
+    }
+}
+
+function renderDropoutsCharts(data) {
+    // Dropout Patterns by Education (chart-dropout)
+    if (chartDropoutElem && data.dropoutByEducation) {
+        const trace1 = {
+            x: data.dropoutByEducation.map(item => item.parental_level_of_education),
+            y: data.dropoutByEducation.map(item => item.dropout_rate),
+            type: 'bar',
+            marker: { color: '#EF4444' },
+            name: 'Dropout Rate'
+        };
+        const layout1 = {
+            title: 'Dropout Rate by Parental Education Level',
+            xaxis: { title: 'Parental Education Level' },
+            yaxis: { title: 'Dropout Rate (%)' }
+        };
+        Plotly.newPlot(chartDropoutElem, [trace1], layout1);
+    }
+
+    // Dropout Patterns by Gender (new chart element needed or combine)
+    // For simplicity, let's add a new chart element in index.html or combine.
+    // For now, I'll just log it or use the existing chartDropoutElem for gender if it's not too cluttered.
+    // Let's assume we'll add a new chart element for gender in index.html later.
+    // For now, I'll just render one chart for dropouts.
+}
+
 
 // --- Main Data Fetching and Rendering ---
 async function fetchDataAndRender() {
     try {
-        const dashboardData = await getDashboardData(startDateInput.value, endDateInput.value);
+        const dashboardData = await getDashboardData();
         renderStats(dashboardData.stats);
-        renderScoreDistributionChart(dashboardData.studentData);
-        renderEngagementCorrelationChart(dashboardData.studentData);
+        currentStudentData = dashboardData.studentData; // Store for AI insights
         
         // Fetch AI insights separately
-        const insights = await getLearningInsights(dashboardData.studentData);
+        const insights = await getLearningInsights(currentStudentData);
         renderAiInsights(insights);
 
     } catch (error) {
-        // Error already shown by getDashboardData or getLearningInsights
         console.error("Dashboard rendering failed:", error);
     }
 }
 
 // --- Event Listeners ---
-startDateInput.addEventListener('change', fetchDataAndRender);
-endDateInput.addEventListener('change', fetchDataAndRender);
+const navButtons = document.querySelectorAll('.nav-btn');
+const pages = document.querySelectorAll('.page');
+
+navButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+        // Remove active class from all buttons
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        // Add active class to the clicked button
+        button.classList.add('active');
+
+        // Hide all pages
+        pages.forEach(page => page.classList.remove('active'));
+
+        // Show the target page
+        const targetPageId = button.dataset.target + '-page';
+        const targetPage = document.getElementById(targetPageId);
+        if (targetPage) {
+            targetPage.classList.add('active');
+            const pageType = button.dataset.target;
+
+            if (pageType === 'overview') {
+                fetchDataAndRender();
+            } else if (pageType === 'trends') {
+                const trendsData = await getTrendsData();
+                renderTrendsCharts(trendsData);
+            } else if (pageType === 'scores') {
+                const scoresData = await getScoresData();
+                renderScoresCharts(scoresData);
+            } else if (pageType === 'dropouts') {
+                const dropoutsData = await getDropoutsData();
+                renderDropoutsCharts(dropoutsData);
+            }
+            // Predictor page doesn't need data fetched on navigation, only on button click
+        }
+    });
+});
+
+if (predictBtn) {
+    predictBtn.addEventListener('click', async () => {
+        const hours = parseFloat(inputHours.value);
+        const quiz = parseFloat(inputQuiz.value);
+        const days = parseFloat(inputDays.value);
+
+        if (isNaN(hours) || isNaN(quiz) || isNaN(days)) {
+            showError('Please enter valid numbers for prediction inputs.');
+            return;
+        }
+
+        const likelihood = await predictCompletion(hours, quiz, days);
+        if (predictResult && likelihood !== null) {
+            predictResult.textContent = `${(likelihood * 100).toFixed(1)}%`;
+        } else if (predictResult) {
+            predictResult.textContent = 'Prediction failed.';
+        }
+    });
+}
 
 // --- Initial Load ---
-document.addEventListener('DOMContentLoaded', fetchDataAndRender);
+document.addEventListener('DOMContentLoaded', () => {
+    // Activate the overview button and show the overview page by default
+    const overviewButton = document.querySelector('.nav-btn[data-target="overview"]');
+    if (overviewButton) {
+        overviewButton.classList.add('active');
+        document.getElementById('overview-page').classList.add('active');
+    }
+    fetchDataAndRender();
+});
+
+// --- Theme Toggle (Placeholder) ---
+const themeToggle = document.getElementById('themeToggle');
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme'); // Example class toggle
+        // You would implement actual theme switching logic here
+        console.log('Theme toggle clicked!');
+    });
+}

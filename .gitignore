@@ -1,52 +1,6 @@
-# --------------------------
-# PYTHON / BACKEND IGNORE
-# --------------------------
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*$py.class
+# Ignore sensitive files
+kaggle.json
 
-# Virtual Environment
+# Ignore Python virtual environment and cache
 venv/
-env/
-ENV/
-
-# Build / Dist files
-build/
-dist/
-*.egg-info/
-
-# Logs
-*.log
-logs/
-
-# --------------------------
-# ALLOW DATA FILES
-# --------------------------
-# (We DO NOT ignore data/raw or data/cleaned)
-# (Frontend/backend will share CSVs)
-# So nothing here is ignored.
-
-# --------------------------
-# SECRETS / ENV
-# --------------------------
-.env
-.env.*
-!.env.example
-
-# --------------------------
-# NODE / FRONTEND (safe)
-# --------------------------
-node_modules/
-npm-debug.log*
-yarn-error.log*
-
-# --------------------------
-# OS / EDITOR
-# --------------------------
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-*.swp
+__pycache__/
