@@ -359,6 +359,77 @@ body {
   color: #c62828;
 }
 
+/* Card Header Fullscreen Button */
+.card-header .fullscreen-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--muted-color);
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.2s ease;
+}
+
+.card-header .fullscreen-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Fullscreen Mode */
+body.fullscreen-active {
+  overflow: hidden; /* Prevent scrolling when in fullscreen */
+}
+
+body.fullscreen-active .sidebar,
+body.fullscreen-active .topbar,
+body.fullscreen-active .card:not(.fullscreen),
+body.fullscreen-active .foot,
+body.fullscreen-active .search-results-content { /* Hide other elements */
+  display: none !important;
+}
+
+body.fullscreen-active .main {
+  padding: 0; /* Remove main padding */
+}
+
+.card.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000; /* Ensure it's on top */
+  margin: 0 !important;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--card-bg); /* Ensure background covers */
+}
+
+.card.fullscreen .card-header {
+  width: 100%;
+  max-width: 1200px; /* Constrain header width if needed */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.card.fullscreen .chart-placeholder {
+  flex-grow: 1;
+  width: 100%;
+  height: calc(100% - 60px); /* Adjust based on header height */
+  border: none;
+  background-color: transparent;
+}
+
+.card.fullscreen .chart-placeholder .js-plotly-plot {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .app {

@@ -348,6 +348,64 @@ async function fetchDataAndRender() {
 // --- Event Listeners ---
 const navButtons = document.querySelectorAll('.nav-btn');
 const pages = document.querySelectorAll('.page');
+const fullscreenButtons = document.querySelectorAll('.fullscreen-btn'); // Get all fullscreen buttons
+
+// Function to toggle fullscreen mode for a chart
+function toggleFullscreen(chartId) {
+    const chartElement = document.getElementById(chartId);
+    if (!chartElement) return;
+
+    const chartCard = chartElement.closest('.card'); // Get the parent card of the chart
+
+    if (chartCard.classList.contains('fullscreen')) {
+        // Exit fullscreen
+        chartCard.classList.remove('fullscreen');
+        document.body.classList.remove('fullscreen-active');
+        // Restore original button text
+        const btn = chartCard.querySelector(`.fullscreen-btn[data-chart-id="${chartId}"]`);
+        if (btn) btn.textContent = 'Fullscreen';
+    } else {
+        // Enter fullscreen
+        // First, ensure no other chart is in fullscreen
+        document.querySelectorAll('.card.fullscreen').forEach(card => {
+            card.classList.remove('fullscreen');
+            const btn = card.querySelector('.fullscreen-btn');
+            if (btn) btn.textContent = 'Fullscreen';
+        });
+
+        chartCard.classList.add('fullscreen');
+        document.body.classList.add('fullscreen-active');
+        // Change button text
+        const btn = chartCard.querySelector(`.fullscreen-btn[data-chart-id="${chartId}"]`);
+        if (btn) btn.textContent = 'Exit Fullscreen';
+    }
+
+    // Re-render the Plotly chart to adjust to new size
+    if (chartElement.classList.contains('chart-placeholder')) { // Check if it's a Plotly chart container
+        const plotDiv = chartElement;
+        if (plotDiv.data && plotDiv.layout) { // Check if Plotly has rendered a chart here
+            Plotly.relayout(plotDiv, { autosize: true });
+        }
+    }
+}
+
+// Add click listeners to all fullscreen buttons
+fullscreenButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const chartId = button.dataset.chartId;
+        toggleFullscreen(chartId);
+    });
+});
+
+// Exit fullscreen on Escape key
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && document.body.classList.contains('fullscreen-active')) {
+        document.querySelectorAll('.card.fullscreen').forEach(card => {
+            const chartId = card.querySelector('.fullscreen-btn').dataset.chartId;
+            toggleFullscreen(chartId); // Toggle to exit fullscreen
+        });
+    }
+});
 
 navButtons.forEach(button => {
     button.addEventListener('click', async () => {
