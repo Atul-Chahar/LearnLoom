@@ -45,3 +45,19 @@ def clean_students_dataset(file_name: str):
     df.to_csv(cleaned_path, index=False)
 
     return cleaned_path
+
+
+def load_cleaned_data():
+    """Loads the cleaned_students.csv file and returns a DataFrame."""
+    try:
+        cleaned_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "..",
+            "data",
+            "cleaned",
+            "cleaned_students.csv"
+        )
+        return pd.read_csv(cleaned_path)
+    except Exception as e:
+        print("Error loading cleaned data:", e)
+        return None
