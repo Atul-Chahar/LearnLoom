@@ -36,8 +36,8 @@ def dashboard_data():
     dropout_students = df[df['overall_score'] < 40]
     dropout_rate = (len(dropout_students) / total_students) * 100 if total_students > 0 else 0
 
-    # Active students (using total students as a proxy for now)
-    active_students = total_students
+    # Active students (students with overall_score >= 40 and < 60)
+    active_students = df[(df['overall_score'] >= 40) & (df['overall_score'] < 60)].shape[0]
     
     # Convert dataframe to list of dictionaries for JSON serialization
     student_data_list = df.to_dict(orient='records')

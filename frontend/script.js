@@ -5,6 +5,7 @@ const completionRateElem = document.getElementById('completionRate');
 const avgScoreElem = document.getElementById('avgScore');
 const dropoutRateElem = document.getElementById('dropoutRate');
 const activeCountElem = document.getElementById('activeCount');
+const activeStudentsCardCountElem = document.getElementById('activeStudentsCardCount');
 
 const chartCompletionElem = document.getElementById('chart-completion');
 const chartScoresElem = document.getElementById('chart-scores');
@@ -15,6 +16,8 @@ const chartTestPrepElem = document.getElementById('chart-test-prep');
 const aiInsightsElem = document.getElementById('aiInsights');
 const loadingIndicator = document.getElementById('loading'); // Assuming a loading indicator
 const errorDisplay = document.getElementById('error'); // Assuming an error display
+const searchInput = document.getElementById('searchInput'); // Added searchInput
+const searchResults = document.getElementById('searchResults'); // Added searchResults
 
 // Predictor elements
 const inputHours = document.getElementById('input-hours');
@@ -179,14 +182,51 @@ async function predictCompletion(hoursWatched, averageScore, daysActive) {
 
 // --- Rendering Functions ---
 function renderStats(stats) {
-    if (completionRateElem) completionRateElem.textContent = `${stats.completionRate}%`;
+    if (completionRateElem) completionRateElem.textContent = `${stats.completionRate}`;
     if (avgScoreElem) avgScoreElem.textContent = `${stats.averageScore}`;
     if (dropoutRateElem) dropoutRateElem.textContent = `${stats.dropoutRate}%`;
-    if (activeCountElem) activeCountElem.textContent = `${stats.activeStudents}`;
+    if (activeCountElem) activeCountElem.textContent = `${stats.activeStudents}`; // Update topbar active count
+    if (activeStudentsCardCountElem) activeStudentsCardCountElem.textContent = `${stats.activeStudents}`; // Update stat card active count
 }
 
 function renderAiInsights(insights) {
     if (aiInsightsElem) aiInsightsElem.innerHTML = insights;
+}
+
+function renderSearchResults(results) {
+    if (!searchResults) return;
+
+    const resultsContent = searchResults.querySelector('.search-results-content');
+    resultsContent.innerHTML = ''; // Clear previous results
+
+    if (results.length === 0) {
+        resultsContent.innerHTML = '<p>No students found matching your search.</p>';
+        searchResults.style.display = 'block';
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.style.listStyleType = 'none';
+    ul.style.padding = '0';
+
+    results.forEach(student => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '10px';
+        li.style.padding = '8px';
+        li.style.border = '1px solid #eee';
+        li.style.borderRadius = '4px';
+        li.innerHTML = `
+            <strong>Gender:</strong> ${student.gender || 'N/A'}<br>
+            <strong>Race:</strong> ${student.race_ethnicity || 'N/A'}<br>
+            <strong>Parental Education:</strong> ${student.parental_level_of_education || 'N/A'}<br>
+            <strong>Lunch:</strong> ${student.lunch || 'N/A'}<br>
+            <strong>Test Prep:</strong> ${student.test_preparation_course || 'N/A'}<br>
+            <strong>Overall Score:</strong> ${student.overall_score ? student.overall_score.toFixed(1) : 'N/A'}
+        `;
+        ul.appendChild(li);
+    });
+    resultsContent.appendChild(ul);
+    searchResults.style.display = 'block';
 }
 
 function renderTrendsCharts(data) {
@@ -359,6 +399,27 @@ if (predictBtn) {
             predictResult.textContent = `${(likelihood * 100).toFixed(1)}%`;
         } else if (predictResult) {
             predictResult.textContent = 'Prediction failed.';
+        }
+    });
+}
+
+if (searchInput) {
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm.length > 0 && currentStudentData.length > 0) {
+            const filteredStudents = currentStudentData.filter(student => {
+                // Search across relevant string fields
+                return (student.gender && student.gender.toLowerCase().includes(searchTerm)) ||
+                       (student.race_ethnicity && student.race_ethnicity.toLowerCase().includes(searchTerm)) ||
+                       (student.parental_level_of_education && student.parental_level_of_education.toLowerCase().includes(searchTerm)) ||
+                       (student.lunch && student.lunch.toLowerCase().includes(searchTerm)) ||
+                       (student.test_preparation_course && student.test_preparation_course.toLowerCase().includes(searchTerm));
+            });
+            renderSearchResults(filteredStudents);
+        } else {
+            if (searchResults) {
+                searchResults.style.display = 'none'; // Hide results if search term is empty
+            }
         }
     });
 }
