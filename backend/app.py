@@ -14,7 +14,7 @@ from api.scores_api import scores_bp
 from api.dropouts_api import dropouts_bp
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 @app.get("/api/health")
 def health():

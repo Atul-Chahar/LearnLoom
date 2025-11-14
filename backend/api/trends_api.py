@@ -19,7 +19,7 @@ def trends_data():
     df['overall_score'] = df[existing_score_cols].mean(axis=1)
 
     # Learning Completion Trend (using parental level of education as a proxy for trend)
-    completion_by_education = df.groupby('parental level of education')['overall_score'].apply(
+    completion_by_education = df.groupby('parental_level_of_education')['overall_score'].apply(
         lambda x: (x >= 60).sum() / len(x) * 100 if len(x) > 0 else 0
     ).reset_index()
     completion_by_education = completion_by_education.rename(columns={'overall_score': 'completion_rate'})

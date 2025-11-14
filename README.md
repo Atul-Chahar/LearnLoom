@@ -1,4 +1,4 @@
-# AI-Powered Learning Insights Dashboard
+# LearnLoom: AI-Powered Learning Insights Dashboard
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/) [![Node.js](https://img.shields.io/badge/Node.js-LTS-green)](https://nodejs.org/) [![React](https://img.shields.io/badge/React-^18.2.0-blue)](https://react.dev/) [![Flask](https://img.shields.io/badge/Flask-2.x-lightgrey)](https://flask.palletsprojects.com/) [![Vite](https://img.shields.io/badge/Vite-^4.4.5-purple)](https://vitejs.dev/) [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v3-blue)](https://tailwindcss.com/)
 
@@ -6,62 +6,98 @@
 
 ## Table of Contents
 
--   [1. Overview](#1-overview)
--   [2. Features](#2-features)
--   [3. Tech Stack](#3-tech-stack)
--   [4. Project Structure](#4-project-structure)
--   [5. Getting Started](#5-getting-started)
-    -   [5.1. Prerequisites](#51-prerequisites)
-    -   [5.2. Repository Setup](#52-repository-setup)
-    -   [5.3. Backend Setup](#53-backend-setup)
-    -   [5.4. Frontend Setup](#54-frontend-setup)
-    -   [5.5. Data Initialization](#55-data-initialization)
-    -   [5.6. Running the Application](#56-running-the-application)
--   [6. API Endpoints](#6-api-endpoints)
--   [7. Development Guidelines](#7-development-guidelines)
--   [8. Contributing](#8-contributing)
--   [9. License](#9-license)
--   [10. Contact](#10-contact)
+-   [1. Executive Summary](#1-executive-summary)
+-   [2. Core Features](#2-core-features)
+-   [3. System Architecture](#3-system-architecture)
+    -   [3.1. Frontend](#31-frontend)
+    -   [3.2. Backend](#32-backend)
+    -   [3.3. Data Pipeline](#33-data-pipeline)
+-   [4. Technology Stack & Rationale](#4-technology-stack--rationale)
+    -   [4.1. Frontend Tech](#41-frontend-tech)
+    -   [4.2. Backend Tech](#42-backend-tech)
+-   [5. Project Structure](#5-project-structure)
+-   [6. Local Development Setup](#6-local-development-setup)
+    -   [6.1. Prerequisites](#61-prerequisites)
+    -   [6.2. Environment Configuration](#62-environment-configuration)
+    -   [6.3. Data Initialization](#63-data-initialization)
+    -   [6.4. Running the Application](#64-running-the-application)
+-   [7. API Endpoints](#7-api-endpoints)
+-   [8. Development Philosophy](#8-development-philosophy)
+-   [9. Future Work](#9-future-work)
+-   [10. Contributing](#10-contributing)
+-   [11. License](#11-license)
 
 ---
 
-## 1. Overview
+## 1. Executive Summary
 
-The **AI-Powered Learning Insights Dashboard** is an innovative EdTech web application designed to empower educators with data-driven insights into student learning behaviors. By leveraging open datasets, the platform tracks key metrics, visualizes trends, and provides AI-generated recommendations to foster improved student outcomes and engagement. This full-stack application combines a robust Python/Flask backend for data processing and API services with a dynamic React/Vite frontend for an intuitive user experience.
+LearnLoom is a full-stack EdTech web application engineered to provide educators with actionable, data-driven insights into student learning patterns. By processing and visualizing academic datasets, the platform transforms raw data into a strategic tool for improving educational outcomes.
 
-## 2. Features
+The system's architecture is built on a decoupled frontend and backend, communicating via a RESTful API. The backend, powered by Python and Flask, is responsible for data ingestion, cleaning, and serving aggregated analytics. The frontend, a modern React/Vite single-page application, provides a responsive and intuitive interface for data visualization and interaction. A key feature is the integration with Google's Gemini API to deliver qualitative, AI-generated summaries of quantitative data, bridging the gap between numbers and narrative.
 
--   **Interactive Dashboard:** A responsive and user-friendly interface for comprehensive data visualization.
--   **Key Performance Indicators (KPIs):** Displays essential metrics such as overall completion rates, average student scores, and total student counts.
--   **Learning Trend Analysis:** Visualizes student performance and activity trends over time, aiding in early identification of patterns.
--   **AI-Powered Insights:** Integrates with Google's Gemini API to generate actionable, intelligent summaries and recommendations based on analyzed student data.
--   **Dynamic Data Loading:** Fetches and processes data from external sources (e.g., Kaggle) via the backend.
--   **RESTful API:** A well-defined and structured API layer facilitating seamless communication between frontend and backend.
+## 2. Core Features
 
-## 3. Tech Stack
+-   **Centralized Analytics Dashboard:** A high-performance, responsive UI presenting a holistic view of student data through interactive charts and KPI cards.
+-   **Key Performance Indicators (KPIs):** At-a-glance metrics including overall course completion rates, average student scores, and total enrollment figures.
+-   **Trend Analysis:** Time-series visualizations of student performance and engagement, enabling educators to identify learning patterns and potential intervention points.
+-   **AI-Generated Narrative Insights:** Leverages the Google Gemini API to synthesize complex data into concise, human-readable summaries and actionable recommendations.
+-   **Automated Data Pipeline:** A backend process for fetching, cleaning, and preparing datasets from external sources like Kaggle, ensuring data integrity.
+-   **RESTful API Architecture:** A clearly defined API contract ensures a stable and scalable interface between the client and server.
 
-### 3.1. Frontend
+## 3. System Architecture
 
--   **Framework:** [React](https://react.dev/) (v18.2.0+) - A declarative, component-based JavaScript library for building user interfaces.
--   **Build Tool:** [Vite](https://vitejs.dev/) (v4.4.5+) - A next-generation frontend tooling that provides a fast development experience.
--   **Language:** [TypeScript](https://www.typescriptlang.org/) - A superset of JavaScript that adds static types.
--   **Styling:** [Tailwind CSS](https://tailwindcss.com/) (v3) - A utility-first CSS framework for rapidly building custom designs.
--   **Charting:** [Recharts](https://recharts.org/en-US/) (v3.4.1+) - A composable charting library built with React and D3.
--   **API Communication:** [@google/genai](https://www.npmjs.com/package/@google/genai) (v1.29.1+) - For integrating Google's Generative AI capabilities.
+The application employs a classic client-server model with a decoupled architecture, promoting separation of concerns and independent scalability.
 
-### 3.2. Backend
+### 3.1. Frontend (Client)
 
--   **Framework:** [Flask](https://flask.palletsprojects.com/) (v2.x) - A lightweight Python web framework.
--   **Language:** [Python](https://www.python.org/) (v3.9+)
+The frontend is a **Single-Page Application (SPA)** built with React. It is responsible for all presentation logic. It does not contain any business logic; instead, it queries the backend API for data and renders it. State management is handled within React components, and API interactions are centralized for maintainability.
+
+### 3.2. Backend (Server)
+
+The backend is a **stateless RESTful API** built with Flask. Its primary responsibilities are:
+1.  **Exposing Data:** It provides structured JSON endpoints for the frontend to consume.
+2.  **Business Logic:** It performs all data calculations, aggregations, and analysis.
+3.  **Data Persistence:** It manages the lifecycle of the data, from raw file to cleaned, in-memory DataFrame.
+4.  **Third-Party Integration:** It securely communicates with the Google Gemini API, abstracting this complexity away from the client.
+
+### 3.3. Data Pipeline
+
+The application relies on a simple, script-driven ETL (Extract, Transform, Load) process:
+1.  **Extract:** The `refresh-data` endpoint triggers a Python script that uses the Kaggle API to download a raw CSV dataset into the `backend/data/raw/` directory.
+2.  **Transform:** The raw data is then processed by a cleaning service (`services/data_cleaning.py`). This step standardizes column names, handles missing values, removes duplicates, and ensures data types are correct. The cleaned data is saved as a new CSV in `backend/data/cleaned/`.
+3.  **Load:** When the Flask server starts, it loads the cleaned CSV into a `pandas` DataFrame, which is then held in memory to serve API requests quickly. This in-memory approach is suitable for datasets of this size and provides low-latency query responses.
+
+## 4. Technology Stack & Rationale
+
+The technology choices were made to prioritize development speed, scalability, and maintainability.
+
+### 4.1. Frontend Tech
+
+-   **Framework:** React (v18.2.0+)
+    -   *Why?* Its component-based architecture is ideal for building a modular and maintainable UI. The vast ecosystem and community support accelerate development.
+-   **Build Tool:** Vite (v4.4.5+)
+    -   *Why?* Vite offers a significantly faster development experience compared to traditional bundlers, with near-instant Hot Module Replacement (HMR) and optimized build outputs.
+-   **Language:** TypeScript
+    -   *Why?* It provides static typing, which reduces runtime errors, improves code quality, and makes the codebase easier to refactor and scale.
+-   **Styling:** Tailwind CSS (v3)
+    -   *Why?* A utility-first CSS framework that enables rapid UI development without leaving the HTML, promoting consistency and reducing CSS file size.
+-   **Charting:** Recharts
+    -   *Why?* A composable and declarative charting library for React that simplifies the creation of complex, interactive visualizations.
+
+### 4.2. Backend Tech
+
+-   **Framework:** Flask (v2.x)
+    -   *Why?* As a lightweight and unopinionated micro-framework, Flask is perfect for building RESTful APIs. It provides the essentials without imposing a rigid structure, allowing for flexibility.
+-   **Language:** Python (v3.9+)
+    -   *Why?* The de facto language for data science and machine learning. Its powerful data manipulation libraries (`pandas`) are central to the backend's functionality.
 -   **Core Libraries:**
-    -   `Flask-Cors`: Enables Cross-Origin Resource Sharing (CORS) for seamless frontend-backend communication.
-    -   `pandas`: A powerful data manipulation and analysis library.
-    -   `scikit-learn`: For machine learning functionalities (e.g., predictive modeling, though currently a placeholder).
-    -   `kaggle`: Python API client for Kaggle datasets.
+    -   `pandas`: The cornerstone of our data processing engine, used for efficient data cleaning, transformation, and analysis.
+    -   `Flask-Cors`: Middleware to handle Cross-Origin Resource Sharing, essential for allowing the frontend (on a different port) to communicate with the backend.
+    -   `kaggle`: The official Python client for interacting with the Kaggle API to automate dataset downloads.
 
-## 4. Project Structure
+## 5. Project Structure
 
-The project adheres to a clear separation of concerns, organized into `backend` and `frontend` directories.
+The monorepo is organized with a clear boundary between the `frontend` and `backend`, minimizing coupling.
 
 ```
 .

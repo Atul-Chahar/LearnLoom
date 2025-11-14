@@ -23,7 +23,7 @@ def scores_data():
     score_distribution.columns = ['score', 'count']
 
     # Performance by Test Preparation
-    performance_by_test_prep = df.groupby('test preparation course')['overall_score'].mean().reset_index()
+    performance_by_test_prep = df.groupby('test_preparation_course')['overall_score'].mean().reset_index()
     performance_by_test_prep.columns = ['test_preparation_course', 'average_score']
 
     return jsonify({

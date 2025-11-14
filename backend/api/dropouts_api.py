@@ -23,7 +23,7 @@ def dropouts_data():
     df['is_dropout'] = df['overall_score'] < dropout_threshold
 
     # Dropout patterns by parental level of education
-    dropout_by_education = df.groupby('parental level of education')['is_dropout'].apply(
+    dropout_by_education = df.groupby('parental_level_of_education')['is_dropout'].apply(
         lambda x: (x.sum() / len(x)) * 100 if len(x) > 0 else 0
     ).reset_index()
     dropout_by_education.columns = ['parental_level_of_education', 'dropout_rate']

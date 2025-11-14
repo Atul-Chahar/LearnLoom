@@ -33,11 +33,11 @@ def predict():
 
     # Feature Engineering for training
     # For simplicity, we'll use a subset of features that can be inferred or are directly available
-    features = df[['overall_score', 'test preparation course', 'parental level of education', 'lunch', 'gender']]
+    features = df[['overall_score', 'test_preparation_course', 'parental_level_of_education', 'lunch', 'gender']]
     target = df['completion']
 
     # Preprocessing for categorical and numerical features
-    categorical_features = ['test preparation course', 'parental level of education', 'lunch', 'gender']
+    categorical_features = ['test_preparation_course', 'parental_level_of_education', 'lunch', 'gender']
     numerical_features = ['overall_score']
 
     preprocessor = ColumnTransformer(
@@ -54,7 +54,7 @@ def predict():
     model_pipeline.fit(features, target)
 
     # Prepare input for prediction based on frontend data
-    # Simulate 'test preparation course' and 'parental level of education'
+    # Simulate 'test_preparation_course' and 'parental_level_of_education'
     # This is a very rough approximation due to feature mismatch
     simulated_test_prep = 'completed' if hours_watched > 10 else 'none'
     
@@ -75,8 +75,8 @@ def predict():
 
     input_df = pd.DataFrame([{
         'overall_score': average_score,
-        'test preparation course': simulated_test_prep,
-        'parental level of education': simulated_parental_education,
+        'test_preparation_course': simulated_test_prep,
+        'parental_level_of_education': simulated_parental_education,
         'lunch': default_lunch,
         'gender': default_gender
     }])
