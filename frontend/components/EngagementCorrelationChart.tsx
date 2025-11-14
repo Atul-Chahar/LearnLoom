@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { StudentData } from '../types';
 
 interface EngagementCorrelationChartProps {
@@ -8,33 +8,44 @@ interface EngagementCorrelationChartProps {
 
 const EngagementCorrelationChart: React.FC<EngagementCorrelationChartProps> = ({ data }) => {
   const chartData = useMemo(() => {
-    return data.map(student => ({
-      hours: student.hoursWatched,
-      score: (student.math_score + student.reading_score + student.writing_score) / 3, // Calculate average score
-      completed: student.completed ? 'Completed' : 'Did Not Complete'
+    // Group students by test preparation course and calculate average score
+    const groupedData: { [key: string]: { totalScore: number; count: number } } = {};
+
+    data.forEach(student => {
+      const testPrep = student.test_prep_course === 'none' ? 'No Prep' : 'Completed Prep';
+      const averageScore = (student.math_score + student.reading_score + student.writing_score) / 3;
+
+      if (!groupedData[testPrep]) {
+        groupedData[testPrep] = { totalScore: 0, count: 0 };
+      }
+      groupedData[testPrep].totalScore += averageScore;
+      groupedData[testPrep].count++;
+    });
+
+    return Object.keys(groupedData).map(key => ({
+      name: key,
+      averageScore: groupedData[key].totalScore / groupedData[key].count,
     }));
   }, [data]);
 
-  const completedData = chartData.filter(d => d.completed === 'Completed');
-  const dropoutData = chartData.filter(d => d.completed === 'Did Not Complete');
-
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Engagement vs. Performance</h3>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md h-full">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Performance by Test Preparation</h3>
       <ResponsiveContainer width="100%" height={400}>
-        <ScatterChart
+        <BarChart
+          data={chartData}
           margin={{
             top: 20,
-            right: 20,
-            bottom: 20,
+            right: 30,
             left: 20,
+            bottom: 5,
           }}
         >
-          <CartesianGrid stroke="rgba(107, 114, 128, 0.3)" />
-          <XAxis type="number" dataKey="hours" name="Hours on Course" unit="h" stroke="#9CA3AF" />
-          <YAxis type="number" dataKey="score" name="Quiz Score" unit="" stroke="#9CA3AF" domain={[0, 1000]} />
-          <Tooltip 
-            cursor={{ strokeDasharray: '3 3' }}
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(107, 114, 128, 0.3)" />
+          <XAxis dataKey="name" stroke="#9CA3AF" />
+          <YAxis stroke="#9CA3AF" domain={[0, 100]} />
+          <Tooltip
+            cursor={{ fill: 'rgba(107, 114, 128, 0.1)' }}
             contentStyle={{
               background: 'rgba(31, 41, 55, 0.8)',
               borderColor: '#4B5563',
@@ -42,9 +53,8 @@ const EngagementCorrelationChart: React.FC<EngagementCorrelationChartProps> = ({
             }}
           />
           <Legend />
-          <Scatter name="Completed" data={completedData} fill="#10B981" />
-          <Scatter name="Did Not Complete" data={dropoutData} fill="#EF4444" />
-        </ScatterChart>
+          <Bar dataKey="averageScore" name="Average Score" fill="#4F46E5" />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

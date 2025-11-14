@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StudentData, DashboardStats } from '../types';
-import { getDashboardData } from '../src/api'; // Corrected import path
+import { getDashboardData } from '../src/api';
 import { getLearningInsights } from '../services/geminiService';
 
 import StatCard from './StatCard';
@@ -14,20 +14,21 @@ const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [insights, setInsights] = useState<string>('');
   
-  // Combined loading state for all async operations
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // State for AI insights loading, separate from initial data load
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
 
-  // Fetch initial dashboard data from the backend
+  // State for date filtering
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  // Fetch dashboard data from the backend with date filters
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getDashboardData();
+        const data = await getDashboardData(startDate, endDate); // Pass dates to API call
         if (data.error) {
           throw new Error(data.error);
         }
@@ -42,11 +43,12 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [startDate, endDate]); // Re-fetch data when dates change
 
   // Fetch AI insights when student data is available
   useEffect(() => {
     if (!studentData || studentData.length === 0) {
+      setInsights(''); // Clear insights if no data
       return;
     }
 
@@ -75,13 +77,37 @@ const Dashboard: React.FC = () => {
   }
 
   if (!stats || studentData.length === 0) {
-    return <div className="text-center p-8">No student data available.</div>;
+    return <div className="text-center p-8">No student data available for the selected period.</div>;
   }
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-800">Dashboard Overview</h2>
       
+      {/* Date Filter Inputs */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div>
+          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+          <input
+            type="date"
+            id="startDate"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          />
+        </div>
+        <div>
+          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+          <input
+            type="date"
+            id="endDate"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          />
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard title="Total Students" value={stats.totalStudents.toString()} />
@@ -110,4 +136,3 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
-
