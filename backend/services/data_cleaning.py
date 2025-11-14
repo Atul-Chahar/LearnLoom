@@ -1,10 +1,14 @@
-import os
 import pandas as pd
+import os
 
-RAW_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "raw")
-CLEANED_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "cleaned")
+# Define paths for raw and cleaned data
+RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'raw', 'StudentsPerformance.csv')
+CLEANED_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'cleaned')
+CLEANED_FILE_PATH = os.path.join(CLEANED_DATA_DIR, 'cleaned_students.csv')
 
-def clean_students_dataset(file_name: str):
+os.makedirs(CLEANED_DATA_DIR, exist_ok=True)
+
+def clean_students_dataset(raw_file_name: str):
     """
     Cleans the raw Kaggle dataset and stores a cleaned version in data/cleaned.
     """
