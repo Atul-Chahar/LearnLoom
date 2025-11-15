@@ -13,6 +13,8 @@ from api.dashboard_api import dashboard_bp # Moved import
 from api.scores_api import scores_bp
 from api.dropouts_api import dropouts_bp
 
+import services.prediction_model # Import the module
+
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
@@ -32,6 +34,10 @@ app.register_blueprint(ai_bp, url_prefix="/api")
 app.register_blueprint(dashboard_bp, url_prefix="/api")
 app.register_blueprint(scores_bp, url_prefix="/api")
 app.register_blueprint(dropouts_bp, url_prefix="/api")
+
+# Load the prediction model when the app starts
+with app.app_context():
+    services.prediction_model.load_model()
 
 if __name__ == "__main__":
     app.run(debug=True)
