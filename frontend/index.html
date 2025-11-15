@@ -58,25 +58,25 @@
         <div id="overview-page" class="page active">
           <!-- Top stat cards -->
           <div class="card-row">
-            <div class="card small">
+            <div class="card small stat-card-clickable" data-metric="completionRate">
               <h3>Completion Rate</h3>
               <div class="big-number" id="completionRate">--</div>
               <div class="card-foot">Overall</div>
             </div>
 
-            <div class="card small">
+            <div class="card small stat-card-clickable" data-metric="averageScore">
               <h3>Avg. Score</h3>
               <div class="big-number" id="avgScore">--</div>
               <div class="card-foot">Overall</div>
             </div>
 
-            <div class="card small">
+            <div class="card small stat-card-clickable" data-metric="dropoutRate">
               <h3>Dropout Rate</h3>
               <div class="big-number danger" id="dropoutRate">--</div>
               <div class="card-foot">Overall</div>
             </div>
 
-            <div class="card small">
+            <div class="card small stat-card-clickable" data-metric="activeStudents">
               <h3>Active Students</h3>
               <div class="big-number" id="activeStudentsCardCount">--</div>
               <div class="card-foot">Currently</div>
@@ -189,6 +189,15 @@
         </footer>
       </section>
     </main>
+  </div>
+
+  <!-- Metric Details Modal -->
+  <div id="metricDetailsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+    </div>
   </div>
 
   <!-- UI JS (relative path) -->

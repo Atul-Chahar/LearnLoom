@@ -28,6 +28,80 @@ const predictResult = document.getElementById('predictResult');
 
 let currentStudentData = []; // To store student data fetched for AI insights
 
+// Metric Details Modal Elements
+const metricDetailsModal = document.getElementById('metricDetailsModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const closeButton = metricDetailsModal ? metricDetailsModal.querySelector('.close-button') : null;
+
+// Detailed explanations for each metric
+const metricDetails = {
+    completionRate: {
+        title: "Completion Rate Details",
+        description: `
+            <p>The <strong>Completion Rate</strong> represents the percentage of students who have achieved an "overall score" of 60% or higher across all subjects (Math, Reading, Writing).</p>
+            <h4>How it's Calculated:</h4>
+            <p><code>(Number of students with Overall Score >= 60) / (Total Number of Students) * 100</code></p>
+            <h4>Data Used:</h4>
+            <ul>
+                <li><strong>Math Score:</strong> Student's score in Mathematics.</li>
+                <li><strong>Reading Score:</strong> Student's score in Reading.</li>
+                <li><strong>Writing Score:</strong> Student's score in Writing.</li>
+                <li>These individual scores are averaged to get the 'Overall Score'.</li>
+            </ul>
+            <p>A higher completion rate indicates better overall student success in the curriculum.</p>
+        `
+    },
+    averageScore: {
+        title: "Average Score Details",
+        description: `
+            <p>The <strong>Average Score</strong> is the mean of all students' "overall scores" across Math, Reading, and Writing.</p>
+            <h4>How it's Calculated:</h4>
+            <p><code>(Sum of all students' Overall Scores) / (Total Number of Students)</code></p>
+            <h4>Data Used:</h4>
+            <ul>
+                <li><strong>Math Score:</strong> Student's score in Mathematics.</li>
+                <li><strong>Reading Score:</strong> Student's score in Reading.</li>
+                <li><strong>Writing Score:</strong> Student's score in Writing.</li>
+                <li>These individual scores are averaged to get each student's 'Overall Score', and then these overall scores are averaged across all students.</li>
+            </ul>
+            <p>This metric provides a general indication of the academic performance level of the student body.</p>
+        `
+    },
+    dropoutRate: {
+        title: "Dropout Rate Details",
+        description: `
+            <p>The <strong>Dropout Rate</strong> indicates the percentage of students who are considered at risk of dropping out, defined as having an "overall score" below 40%.</p>
+            <h4>How it's Calculated:</h4>
+            <p><code>(Number of students with Overall Score < 40) / (Total Number of Students) * 100</code></p>
+            <h4>Data Used:</h4>
+            <ul>
+                <li><strong>Math Score:</strong> Student's score in Mathematics.</li>
+                <li><strong>Reading Score:</strong> Student's score in Reading.</li>
+                <li><strong>Writing Score:</strong> Student's score in Writing.</li>
+                <li>These individual scores are averaged to get the 'Overall Score'.</li>
+            </ul>
+            <p>A high dropout rate suggests potential issues in curriculum, teaching methods, or student support, requiring intervention.</p>
+        `
+    },
+    activeStudents: {
+        title: "Active Students Details",
+        description: `
+            <p><strong>Active Students</strong> refers to the number of students who are currently engaged but have not yet completed the course and are not considered dropouts. This means their "overall score" is between 40% and 59.9%.</p>
+            <h4>How it's Calculated:</h4>
+            <p><code>Count of students where (Overall Score >= 40 AND Overall Score < 60)</code></p>
+            <h4>Data Used:</h4>
+            <ul>
+                <li><strong>Math Score:</strong> Student's score in Mathematics.</li>
+                <li><strong>Reading Score:</strong> Student's score in Reading.</li>
+                <li><strong>Writing Score:</strong> Student's score in Writing.</li>
+                <li>These individual scores are averaged to get the 'Overall Score'.</li>
+            </ul>
+            <p>This metric helps identify the segment of students who are progressing but might need continued support to reach completion.</p>
+        `
+    }
+};
+
 // --- Helper Functions ---
 function showLoading() {
     // if (loadingIndicator) loadingIndicator.style.display = 'block';
@@ -529,4 +603,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (themeToggle) {
         themeToggle.addEventListener('click', toggleTheme);
     }
+
+    // Metric Details Modal Logic
+    const statCards = document.querySelectorAll('.stat-card-clickable');
+    if (statCards) {
+        statCards.forEach(card => {
+            card.style.cursor = 'pointer'; // Indicate clickable
+            card.addEventListener('click', () => {
+                const metric = card.dataset.metric;
+                showMetricDetails(metric);
+            });
+        });
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            metricDetailsModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target === metricDetailsModal) {
+            metricDetailsModal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && metricDetailsModal.style.display === 'block') {
+            metricDetailsModal.style.display = 'none';
+        }
+    });
 });
+
+// Function to show metric details in the modal
+function showMetricDetails(metric) {
+    const details = metricDetails[metric];
+    if (details && metricDetailsModal) {
+        modalTitle.textContent = details.title;
+        modalBody.innerHTML = details.description;
+        metricDetailsModal.style.display = 'block';
+    }
+}
