@@ -148,6 +148,71 @@ body {
   padding: 20px;
 }
 
+/* Filter Panel */
+.filter-panel {
+  background-color: var(--card-bg);
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-panel label {
+  font-size: 0.9em;
+  color: var(--muted-color);
+  font-weight: bold;
+}
+
+.filter-panel select,
+.filter-panel input[type="text"] {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 0.9em;
+  min-width: 120px;
+}
+
+.filter-panel button {
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-panel button.primary {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+}
+
+.filter-panel button.primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.filter-panel button.ghost {
+  background: none;
+  border: 1px solid var(--muted-color);
+  color: var(--muted-color);
+}
+
+.filter-panel button.ghost:hover {
+  border-color: var(--text-color);
+  color: var(--text-color);
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;

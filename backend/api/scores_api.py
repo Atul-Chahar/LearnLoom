@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify
-from services.data_cleaning import load_cleaned_data
+from flask import Blueprint, jsonify, request
+from services.data_cleaning import load_cleaned_data, apply_filters
 import pandas as pd
 
 scores_bp = Blueprint("scores", __name__)
@@ -9,6 +9,21 @@ def scores_data():
     df = load_cleaned_data()
     if df is None or df.empty:
         return jsonify({"error": "No data available"}), 500
+
+    # Extract filters from request arguments
+    filters = {
+        'gender': request.args.get('gender'),
+        'parental_level_of_education': request.args.get('parental_level_of_education'),
+        'test_preparation_course': request.args.get('test_preparation_course'),
+        'lunch': request.args.get('lunch'),
+        'race_ethnicity': request.args.get('race_ethnicity')
+    }
+    
+    # Apply filters
+    df = apply_filters(df, filters)
+
+    if df.empty:
+        return jsonify({"scoreDistribution": [], "performanceByTestPrep": []})
 
     score_cols = ['math_score', 'reading_score', 'writing_score']
     existing_score_cols = [col for col in score_cols if col in df.columns]

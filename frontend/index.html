@@ -54,6 +54,59 @@
         </div>
       </header>
 
+      <!-- Filter Panel -->
+      <section class="filter-panel">
+        <div class="filter-group">
+          <label for="filter-gender">Gender:</label>
+          <select id="filter-gender">
+            <option value="">All</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-race-ethnicity">Race/Ethnicity:</label>
+          <select id="filter-race-ethnicity">
+            <option value="">All</option>
+            <option value="group A">Group A</option>
+            <option value="group B">Group B</option>
+            <option value="group C">Group C</option>
+            <option value="group D">Group D</option>
+            <option value="group E">Group E</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-parental-education">Parental Education:</label>
+          <select id="filter-parental-education">
+            <option value="">All</option>
+            <option value="some high school">Some High School</option>
+            <option value="high school">High School</option>
+            <option value="some college">Some College</option>
+            <option value="associate's degree">Associate's Degree</option>
+            <option value="bachelor's degree">Bachelor's Degree</option>
+            <option value="master's degree">Master's Degree</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-lunch">Lunch:</label>
+          <select id="filter-lunch">
+            <option value="">All</option>
+            <option value="standard">Standard</option>
+            <option value="free/reduced">Free/Reduced</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-test-prep">Test Prep:</label>
+          <select id="filter-test-prep">
+            <option value="">All</option>
+            <option value="none">None</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <button id="applyFiltersBtn" class="primary">Apply Filters</button>
+        <button id="clearFiltersBtn" class="ghost">Clear Filters</button>
+      </section>
+
       <section class="content" id="content">
         <div id="overview-page" class="page active">
           <!-- Top stat cards -->

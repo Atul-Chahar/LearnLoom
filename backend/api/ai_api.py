@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from services.ai_summary import generate_ai_summary
+from services.data_cleaning import apply_filters # Import apply_filters
 import pandas as pd
 
 ai_bp = Blueprint("ai", __name__)
@@ -11,6 +12,18 @@ def ai_summary():
         return jsonify({"error": "No student data provided"}), 400
 
     df = pd.DataFrame(student_data_list)
+
+    # Extract filters from request arguments (even for POST, args can be used for filters)
+    filters = {
+        'gender': request.args.get('gender'),
+        'parental_level_of_education': request.args.get('parental_level_of_education'),
+        'test_preparation_course': request.args.get('test_preparation_course'),
+        'lunch': request.args.get('lunch'),
+        'race_ethnicity': request.args.get('race_ethnicity')
+    }
+    
+    # Apply filters
+    df = apply_filters(df, filters)
 
     # Ensure score columns are numeric
     score_cols = ['math_score', 'reading_score', 'writing_score']

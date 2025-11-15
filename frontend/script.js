@@ -19,6 +19,17 @@ const errorDisplay = document.getElementById('error'); // Assuming an error disp
 const searchInput = document.getElementById('searchInput'); // Added searchInput
 const searchResults = document.getElementById('searchResults'); // Added searchResults
 
+// Filter Elements
+const filterGender = document.getElementById('filter-gender');
+const filterRaceEthnicity = document.getElementById('filter-race-ethnicity');
+const filterParentalEducation = document.getElementById('filter-parental-education');
+const filterLunch = document.getElementById('filter-lunch');
+const filterTestPrep = document.getElementById('filter-test-prep');
+const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+let currentFilters = {}; // To store the currently applied filters
+
 // Predictor elements
 const inputHours = document.getElementById('input-hours');
 const inputQuiz = document.getElementById('input-quiz');
@@ -127,12 +138,23 @@ function clearError() {
     }
 }
 
+// Helper to get filter parameters as a query string
+function getFilterParams() {
+    const params = new URLSearchParams();
+    for (const key in currentFilters) {
+        if (currentFilters[key]) {
+            params.append(key, currentFilters[key]);
+        }
+    }
+    return params.toString() ? `?${params.toString()}` : '';
+}
+
 // --- API Calls ---
 async function getDashboardData() {
     clearError();
     showLoading();
     try {
-        const response = await fetch(`${API_BASE_URL}/dashboard-data`);
+        const response = await fetch(`${API_BASE_URL}/dashboard-data${getFilterParams()}`);
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `Backend responded with status ${response.status}`);
@@ -151,7 +173,7 @@ async function getTrendsData() {
     clearError();
     showLoading();
     try {
-        const response = await fetch(`${API_BASE_URL}/trends-data`);
+        const response = await fetch(`${API_BASE_URL}/trends-data${getFilterParams()}`);
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `Backend responded with status ${response.status}`);
@@ -170,7 +192,7 @@ async function getScoresData() {
     clearError();
     showLoading();
     try {
-        const response = await fetch(`${API_BASE_URL}/scores-data`);
+        const response = await fetch(`${API_BASE_URL}/scores-data${getFilterParams()}`);
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `Backend responded with status ${response.status}`);
@@ -189,7 +211,7 @@ async function getDropoutsData() {
     clearError();
     showLoading();
     try {
-        const response = await fetch(`${API_BASE_URL}/dropouts-data`);
+        const response = await fetch(`${API_BASE_URL}/dropouts-data${getFilterParams()}`);
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `Backend responded with status ${response.status}`);
@@ -206,7 +228,7 @@ async function getDropoutsData() {
 
 async function getLearningInsights(studentData) {
     try {
-        const response = await fetch(`${API_BASE_URL}/ai-summary`, {
+        const response = await fetch(`${API_BASE_URL}/ai-summary${getFilterParams()}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -229,7 +251,7 @@ async function getLearningInsights(studentData) {
 
 async function predictCompletion(hoursWatched, averageScore, daysActive) {
     try {
-        const response = await fetch(`${API_BASE_URL}/predict`, {
+        const response = await fetch(`${API_BASE_URL}/predict${getFilterParams()}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -633,7 +655,68 @@ document.addEventListener('DOMContentLoaded', () => {
             metricDetailsModal.style.display = 'none';
         }
     });
+
+    // Filter Panel Logic
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', applyFilters);
+    }
+
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', clearFilters);
+    }
+
+    // Initial load with any default filters
+    fetchDataAndRender();
 });
+
+// Function to apply filters
+function applyFilters() {
+    currentFilters = {
+        gender: filterGender.value,
+        race_ethnicity: filterRaceEthnicity.value,
+        parental_level_of_education: filterParentalEducation.value,
+        lunch: filterLunch.value,
+        test_preparation_course: filterTestPrep.value
+    };
+    // Re-fetch and re-render data with new filters
+    fetchDataAndRender();
+    // Also re-render the current active page's charts
+    const activeNavButton = document.querySelector('.nav-btn.active');
+    if (activeNavButton) {
+        const pageType = activeNavButton.dataset.target;
+        if (pageType === 'trends') {
+            getTrendsData().then(renderTrendsCharts);
+        } else if (pageType === 'scores') {
+            getScoresData().then(renderScoresCharts);
+        } else if (pageType === 'dropouts') {
+            getDropoutsData().then(renderDropoutsCharts);
+        }
+    }
+}
+
+// Function to clear filters
+function clearFilters() {
+    filterGender.value = '';
+    filterRaceEthnicity.value = '';
+    filterParentalEducation.value = '';
+    filterLunch.value = '';
+    filterTestPrep.value = '';
+    currentFilters = {}; // Clear stored filters
+    // Re-fetch and re-render data without filters
+    fetchDataAndRender();
+    // Also re-render the current active page's charts
+    const activeNavButton = document.querySelector('.nav-btn.active');
+    if (activeNavButton) {
+        const pageType = activeNavButton.dataset.target;
+        if (pageType === 'trends') {
+            getTrendsData().then(renderTrendsCharts);
+        } else if (pageType === 'scores') {
+            getScoresData().then(renderScoresCharts);
+        } else if (pageType === 'dropouts') {
+            getDropoutsData().then(renderDropoutsCharts);
+        }
+    }
+}
 
 // Function to show metric details in the modal
 function showMetricDetails(metric) {

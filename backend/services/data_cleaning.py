@@ -51,6 +51,22 @@ def clean_students_dataset(raw_file_name: str):
     return df, cleaned_path
 
 
+def apply_filters(df, filters):
+    """
+    Applies a dictionary of filters to the DataFrame.
+    Filters should be in the format: {'column_name': 'value'}
+    """
+    filtered_df = df.copy()
+    for column, value in filters.items():
+        if value and column in filtered_df.columns:
+            # Handle multiple values for a single filter (e.g., 'gender=male,female')
+            if isinstance(value, str) and ',' in value:
+                values = [v.strip() for v in value.split(',')]
+                filtered_df = filtered_df[filtered_df[column].isin(values)]
+            else:
+                filtered_df = filtered_df[filtered_df[column] == value]
+    return filtered_df
+
 def load_cleaned_data():
     """Loads the cleaned_students.csv file and returns a DataFrame."""
     try:

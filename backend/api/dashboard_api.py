@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from services.data_cleaning import load_cleaned_data
+from services.data_cleaning import load_cleaned_data, apply_filters
 import pandas as pd
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -13,6 +13,21 @@ def dashboard_data():
     df = load_cleaned_data()
     if df is None or df.empty:
         return jsonify({"error": "No data available"}), 500
+
+    # Extract filters from request arguments
+    filters = {
+        'gender': request.args.get('gender'),
+        'parental_level_of_education': request.args.get('parental_level_of_education'),
+        'test_preparation_course': request.args.get('test_preparation_course'),
+        'lunch': request.args.get('lunch'),
+        'race_ethnicity': request.args.get('race_ethnicity')
+    }
+    
+    # Apply filters
+    df = apply_filters(df, filters)
+
+    if df.empty:
+        return jsonify({"stats": {"totalStudents": 0, "completionRate": 0, "averageScore": 0, "dropoutRate": 0, "activeStudents": 0}, "studentData": []})
 
     total_students = len(df)
     
