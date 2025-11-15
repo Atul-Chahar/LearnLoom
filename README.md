@@ -201,7 +201,7 @@ Ensure you have the following installed:
     *   Add your Google Gemini API key to it. You can obtain a key from [Google AI Studio](https://aistudio.google.com/app/apikey).
     *   The content of your `.env` file should be:
         ```
-VITE_GEMINI_API_KEY="YOUR_API_KEY_HERE"
+VITE_GEMINI_API_KEY="YOUR_API_KEY_HERE"//
 ```
 
 3.  **Install Node.js dependencies:**
